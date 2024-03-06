@@ -12,7 +12,7 @@ public:
         mux_output_sub = nh.subscribe("/cmd_vel", 1, &CmdVelToVehicleCmd::cmdVelCallback, this);
         mux_output_pub = nh.advertise<autoware_msgs::VehicleCmd>("/vehicle_cmd", 1);
         // autoware input
-        autoware_vehicle_sub = nh.subscribe("autoware名字",1,&CmdVelToVehicleCmd::autoware_vehicle_callback,this);        
+        autoware_vehicle_sub = nh.subscribe("/autoware",1,&CmdVelToVehicleCmd::autoware_vehicle_callback,this);        
         autoware_cmd_pub = nh.advertise<geometry_msgs::Twist>("/input/autoware_cmd",1);
     }
 

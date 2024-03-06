@@ -1,0 +1,19 @@
+<!--
+  Example standalone launcher for the velocity multiplexer.
+  
+  For best results you would usually load this into the core control system
+  to avoid latency for reactive controllers. However for other apps, running
+  it standalone with a similar configuration will also work.
+ -->
+<launch>
+  <!-- nodelet manager -->
+   <!-- 设置ROS环境 -->
+  <arg name="twist2vehiclecmd_node" default="twist2vehiclecmd_node"/>
+
+  <!-- 创建节点 -->
+  <node name="$(arg twist2vehiclecmd_node)" pkg="twist2vehiclecmd" type="twist2vehiclecmd_node">
+    <!-- 设置节点参数 -->
+    <param name="input_topic" value="cmd_vel"/>
+    <param name="output_topic" value="vehicle_cmd"/>
+  </node>
+</launch>

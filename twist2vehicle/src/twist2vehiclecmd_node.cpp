@@ -1,3 +1,5 @@
+#include "ros/publisher.h"
+#include "ros/subscriber.h"
 #include <ros/ros.h>
 #include <geometry_msgs/Twist.h>
 #include <autoware_msgs/VehicleCmd.h>
@@ -5,18 +7,32 @@
 
 class CmdVelToVehicleCmd {
 public:
-    CmdVelToVehicleCmd() {
-        // 初始化订阅者，订阅/cmd_vel话题，消息类型为Twist
-        sub = nh.subscribe("/cmd_vel", 1, &CmdVelToVehicleCmd::cmdVelCallback, this);
-
-        // 初始化发布者，发布到/vehicle_cmd话题，消息类型为VehicleCmd
-        pub = nh.advertise<autoware_msgs::VehicleCmd>("/vehicle_cmd", 1);
+  CmdVelToVehicleCmd() {
+        // output
+        mux_output_sub = nh.subscribe("/cmd_vel", 1, &CmdVelToVehicleCmd::cmdVelCallback, this);
+        mux_output_pub = nh.advertise<autoware_msgs::VehicleCmd>("/vehicle_cmd", 1);
+        // autoware input
+        autoware_vehicle_sub = nh.subscribe("autoware名字",1,&CmdVelToVehicleCmd::autoware_vehicle_callback,this);        
+        autoware_cmd_pub = nh.advertise<geometry_msgs::Twist>("/input/autoware_cmd",1);
     }
 
 private:
     ros::NodeHandle nh;
-    ros::Subscriber sub;
-    ros::Publisher pub;
+
+    ros::Subscriber mux_output_sub;
+    ros::Publisher  mux_output_pub;
+
+    ros::Subscriber autoware_vehicle_sub;
+    ros::Publisher autoware_cmd_pub;
+
+    // ros::Publisher pub;
+    void autoware_vehicle_callback(const autoware_msgs::VehicleCmd &msg) {
+      geometry_msgs::Twist cmd_vel_pub;
+      cmd_vel_pub.linear = msg.twist_cmd.twist.linear;
+      cmd_vel_pub.angular = msg.twist_cmd.twist.angular;
+      autoware_cmd_pub.publish(cmd_vel_pub);
+      
+    };
 
     void cmdVelCallback(const geometry_msgs::Twist::ConstPtr& msg) {
         // 创建VehicleCmd消息
@@ -37,7 +53,7 @@ private:
         vehicle_cmd.ctrl_cmd = ctrl_cmd;
 
         // 发布VehicleCmd消息
-        pub.publish(vehicle_cmd);
+        mux_output_pub.publish(vehicle_cmd);
     }
 };
 
